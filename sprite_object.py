@@ -1,5 +1,7 @@
 import pygame as pg
 from settings import *
+import os
+from collections import deque
 
 class SpriteObject:
     def __init__(self, game, path = 'resources/sprites/static_sprites/candlebra.bmp', pos=(10.5, 3.5), scale=0.7, shift=0.27):
@@ -47,3 +49,37 @@ class SpriteObject:
 
     def update(self):
         self.get_sprite()
+
+class AnimatedSprite(SpriteObject):
+    def __init__(self, game, path='resources/sprites/animated_sprites/green_light/0.bmp', pos=(11.5, 3.5), scale=0.8, shift=0.15, animeted_time=120):
+        super().__init__(game, path, pos, scale, shift)
+        self.animeted_time = animeted_time
+        self.path = path.rsplit('/', 1)[0]
+        self.images = self.get_images(self.path)
+        self.animeted_time_prev = pg.time.get_ticks()
+        self.animated_trigger = False
+
+    def update(self):
+        super().update()
+        self.check_animation_time()
+        self.animate(self.images)
+
+    def animate(self, image):
+        if self.animated_trigger:
+            self.images.rotate(-1)
+            self.image = self.images[0]
+
+    def check_animation_time(self):
+        self.animated_trigger = False
+        time_now = pg.time.get_ticks()
+        if time_now - self.animeted_time_prev > self.animeted_time:
+            self.animeted_time_prev = time_now
+            self.animated_trigger = True
+
+    def get_images(self, path):
+        image = deque()
+        for file_name in os.listdir(path):
+            if os.path.isfile(os.path.join(path, file_name)):
+                img = pg.image.load(os.path.join(path, file_name)).convert_alpha()
+                image.append(img)
+        return image
