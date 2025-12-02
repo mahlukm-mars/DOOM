@@ -77,9 +77,12 @@ class AnimatedSprite(SpriteObject):
             self.animated_trigger = True
 
     def get_images(self, path):
-        image = deque()
-        for file_name in os.listdir(path):
+        images = deque()
+    # Sortir file agar urutannya benar (0.bmp, 1.bmp, 2.bmp, dst)
+        for file_name in sorted(os.listdir(path)):
+            if not file_name.endswith('.bmp'):
+                continue
             if os.path.isfile(os.path.join(path, file_name)):
                 img = pg.image.load(os.path.join(path, file_name)).convert_alpha()
-                image.append(img)
-        return image
+                images.append(img)
+        return images
